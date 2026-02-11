@@ -17,7 +17,7 @@ node {
 
             echo "Updating deployment.yaml with new tag..."
 
-            sed -i "s#bsdocker01/k8sdemo:.*#bsdocker01/k8sdemo:${DOCKERTAG}#g" deployment.yaml
+            sed -i "s#bsdocker10/k8sdemo:.*#bsdocker10/k8sdemo:${DOCKERTAG}#g" deployment.yaml
 
             git add deployment.yaml
             git commit -m "Update image tag to ${DOCKERTAG}" || echo "No changes to commit"
