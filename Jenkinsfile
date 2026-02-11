@@ -1,28 +1,29 @@
 node {
-    def app
 
     stage('Clone repository') {
-      
-
         checkout scm
     }
 
-    stage('Update GIT') {
-            script {
-                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                    withCredentials([usernamePassword(credentialsId: 'git-pat', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
-                        //def encodedPassword = URLEncoder.encode("$GIT_PASSWORD",'UTF-8')
-                        sh "git config user.email bshrivastava01@gmail.com"
-                        sh "git config user.name basant"
-                        //sh "git switch master"
-                        sh "cat deployment.yaml"
-                        sh "sed -i 's+bsdocker01/k8sdemo.*+bsdocker01/k8sdemo:${DOCKERTAG}+g' deployment.yaml"
-                        sh "cat deployment.yaml"
-                        sh "git add ."
-                        sh "git commit -m 'Done by Jenkins Job changemanifest: ${env.BUILD_NUMBER}'"
-                        sh "git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/${GIT_USERNAME}/kubernetesmanifest.git HEAD:main"
-      }
+    stage('Update Manifest') {
+        withCredentials([usernamePassword(
+            credentialsId: 'git-pat',
+            usernameVariable: 'GIT_USERNAME',
+            passwordVariable: 'GIT_PASSWORD'
+        )]) {
+
+            sh '''
+            git config user.email "bshrivastava01@gmail.com"
+            git config user.name "basant"
+
+            echo "Updating deployment.yaml with new tag..."
+
+            sed -i "s#bsdocker01/k8sdemo:.*#bsdocker01/k8sdemo:${DOCKERTAG}#g" deployment.yaml
+
+            git add deployment.yaml
+            git commit -m "Update image tag to ${DOCKERTAG}" || echo "No changes to commit"
+
+            git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/${GIT_USERNAME}/kubernetesmanifest.git main
+            '''
+        }
     }
-  }
-}
 }
