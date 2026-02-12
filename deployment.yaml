@@ -36,3 +36,9 @@ spec:
     targetPort: 5000
   selector:
     app: flaskdemo
+ spec:
+   template:
+    spec:
+      imagePullSecrets:
+      - name: dockerhub-secret
+   
